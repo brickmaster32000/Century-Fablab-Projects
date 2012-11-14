@@ -123,10 +123,10 @@ void setup() {
 
   strcpy(buffer, "GPSLOG00.TXT");
  
- /*******************************
- Finds the last existing logfile and creates a new one after it
- 
- *******************************/
+// /*******************************
+// Finds the last existing logfile and creates a new one after it
+// Comment out to use the same logfile.
+// *******************************/
   for (i = 0; i < 100; i++) {
     buffer[6] = '0' + i/10;
     buffer[7] = '0' + i%10;
@@ -136,6 +136,12 @@ void setup() {
     }
   }
 
+//Removes duplicate logfile, only matter if rewriting over the same file
+  if(SD.exists(buffer)){
+    SD.remove(buffer);
+    Serial.println("Deleting duplicate logfile
+  }
+  
   logfile = SD.open(buffer, FILE_WRITE);
   if( ! logfile ) {
     Serial.print("Couldnt create "); Serial.println(buffer);
