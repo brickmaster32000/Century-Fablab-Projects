@@ -59,7 +59,7 @@ File logfile;
 File dumpfile;
 
 const int sensorRatio = 10; //Changes how many time to check the accelerometer between gps readings.
-const unsigned long dataTimeout = 900000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
+const unsigned long dataTimeout = 10000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
 boolean stringComplete = false; //toggles datadump
 
 // read a Hex value and return the decimal equivalent
@@ -123,7 +123,7 @@ void setup() {
   strcpy(buffer, "GPSLOG00.TXT");
  
  /*******************************
- Remove the for loop to 
+ Finds the last existing logfile and creates a new one after it
  
  *******************************/
   for (i = 0; i < 100; i++) {
@@ -388,13 +388,12 @@ void loop() {
     strcpy(buffer, "GPSLOG00.TXT");
    
    /*******************************
-   Remove the for loop to 
+   finds the last log file and opens it for reading
    
    *******************************/
     for (i = 0; i < 100; i++) {
       buffer[6] = '0' + i/10;
       buffer[7] = '0' + i%10;
-      // create if does not exist, do not open existing, write, sync after write
       if (! SD.exists(buffer)) {
         break;
       }
@@ -408,16 +407,17 @@ void loop() {
       buffer[7] = buffer[7] - 1;
     }
     
+    Serial.print("Reading from "); Serial.println(buffer);
     dumpfile = SD.open(buffer, FILE_READ);
-    //Serial.println("Data recording stopped");
-    //Serial.println("Press enter to retrieve data");
+    
+
     if(dumpfile){
       while(dumpfile.available()){
         Serial.write(dumpfile.read());
       }
     }
     else {
-      Serial.println("error opening datalog.txt");
+      Serial.println("error opening logfile");
     } 
   }
 
