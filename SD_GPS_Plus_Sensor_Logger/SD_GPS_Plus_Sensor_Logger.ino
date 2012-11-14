@@ -58,7 +58,8 @@ uint8_t i;
 File logfile;
 File dumpfile;
 
-const int sensorRatio = 10; //Changes how many time to check the accelerometer between gps readings.
+const int BarometerToGPSRatio = 2; //Controls how often to poll the barometer for each gps reading
+const int AccelerometerToBarometerRatio = 20; //Controls how often to poll the accelerometers per barometer reading
 const unsigned long dataTimeout = 10000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
 boolean stringComplete = false; //toggles datadump
 
@@ -295,30 +296,20 @@ void loop() {
           logfile.write((uint8_t *) buffer, bufferidx);    //write the string to the SD file
           
           //Records data from other sensors while waiting for the gps.
-          for(int i = 0; i < sensorRatio; i++){
-            int xa = analogRead(A0);
-            int xb = analogRead(1);
-            int yb = analogRead(A2);
-            int zb = analogRead(A3);
+          for(int i = 0; i < BarometerToGPSRatio; i++){
+//            int xa = analogRead(A0);
+//            int xb = analogRead(1);
+//            int yb = analogRead(A2);
+//            int zb = analogRead(A3);
+            logfile.print("time: ");
+            logfile.println(millis());
+            Serial.println(millis());
+            
             int pressure = bmp.readPressure();
             int temperature = bmp.readTemperature();
             int altitude = bmp.readAltitude();
             
-            logfile.print("x: ");
-            logfile.println(xa);
-            //Serial.println("xa: " + String(xa));
-            
-            logfile.print("x: ");
-            logfile.println(xb);
-            //Serial.println("xb: " + String(xb));
-            
-            logfile.print("y: ");
-            logfile.println(yb);
-            //Serial.println("yb: " + String(yb));
-            
-            logfile.print("z: ");
-            logfile.println(zb);
-            //Serial.println("zb: " + String(zb));
+//            
             
             logfile.print("pressure: ");
             logfile.println(pressure);
@@ -333,6 +324,33 @@ void loop() {
             //Serial.println("altitude: " + String(altitude));
             
             logfile.flush();
+            for(int j = 0; j < AccelerometerToBarometerRatio; j++){
+              logfile.print("time: ");
+              logfile.println(millis());
+              Serial.println(millis());
+              
+              int xa = analogRead(A0);
+              int xb = analogRead(1);
+              int yb = analogRead(A2);
+              int zb = analogRead(A3);
+
+              logfile.print("x: ");
+              logfile.println(xa);
+              //Serial.println("xa: " + String(xa));
+           
+             logfile.print("x: ");
+             logfile.println(xb);
+             //Serial.println("xb: " + String(xb));
+           
+             logfile.print("y: ");
+             logfile.println(yb);
+             //Serial.println("yb: " + String(yb));
+          
+             logfile.print("z: ");
+             logfile.println(zb);
+             //Serial.println("zb: " + String(zb));
+             logfile.flush();
+            }
           }
           logfile.flush();
           
