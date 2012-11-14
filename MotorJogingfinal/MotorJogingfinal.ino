@@ -65,7 +65,7 @@ void loop(){
   Serial.println(analogRead(accelerometer));
   
   //Waits for trigger condition, waits for programed delay and deploys airbrake.
-  if(analogRead((accelerometer) < trigger)  && !deployed){
+  if((analogRead(accelerometer) < trigger)  && !deployed){
     delay(airbrakeDelay);
     analogWrite(motorControl, 255);
     delay(1000);

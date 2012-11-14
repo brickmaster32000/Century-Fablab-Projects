@@ -60,7 +60,7 @@ File dumpfile;
 
 const int BarometerToGPSRatio = 2; //Controls how often to poll the barometer for each gps reading
 const int AccelerometerToBarometerRatio = 20; //Controls how often to poll the accelerometers per barometer reading
-const unsigned long dataTimeout = 10000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
+const unsigned long dataTimeout = 900000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
 boolean stringComplete = false; //toggles datadump
 
 // read a Hex value and return the decimal equivalent
@@ -137,10 +137,10 @@ void setup() {
   }
 
 //Removes duplicate logfile, only matter if rewriting over the same file
-  if(SD.exists(buffer)){
-    SD.remove(buffer);
-    Serial.println("Deleting duplicate logfile
-  }
+//  if(SD.exists(buffer)){
+//    SD.remove(buffer);
+//    Serial.println("Deleting duplicate logfile");
+//  }
   
   logfile = SD.open(buffer, FILE_WRITE);
   if( ! logfile ) {
