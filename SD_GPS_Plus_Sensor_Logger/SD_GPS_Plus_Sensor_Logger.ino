@@ -24,8 +24,8 @@
 #define LOG_RMC_FIXONLY 0  /* set to 1 to only log to SD when GPD has a fix */
 
 // what to log
-#define LOG_RMC 1 // RMC-Recommended Minimum Specific GNSS Data, message 103,04
-#define LOG_GGA 0 // GGA-Global Positioning System Fixed Data, message 103,00
+#define LOG_RMC 0 // RMC-Recommended Minimum Specific GNSS Data, message 103,04
+#define LOG_GGA 1 // GGA-Global Positioning System Fixed Data, message 103,00
 #define LOG_GLL 0 // GLL-Geographic Position-Latitude/Longitude, message 103,01
 #define LOG_GSA 0 // GSA-GNSS DOP and Active Satellites, message 103,02
 #define LOG_GSV 0 // GSV-GNSS Satellites in View, message 103,03
