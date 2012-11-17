@@ -24,7 +24,7 @@
 #define LOG_RMC_FIXONLY 0  /* set to 1 to only log to SD when GPD has a fix */
 
 // what to log
-#define LOG_RMC 0 // RMC-Recommended Minimum Specific GNSS Data, message 103,04
+#define LOG_RMC 1 // RMC-Recommended Minimum Specific GNSS Data, message 103,04
 #define LOG_GGA 1 // GGA-Global Positioning System Fixed Data, message 103,00
 #define LOG_GLL 0 // GLL-Geographic Position-Latitude/Longitude, message 103,01
 #define LOG_GSA 0 // GSA-GNSS DOP and Active Satellites, message 103,02
@@ -62,6 +62,7 @@ const int BarometerToGPSRatio = 2; //Controls how often to poll the barometer fo
 const int AccelerometerToBarometerRatio = 20; //Controls how often to poll the accelerometers per barometer reading
 const unsigned long dataTimeout = 900000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
 boolean stringComplete = false; //toggles datadump
+boolean gpscheckdisable = true; //logs data regardless of good gps data
 
 // read a Hex value and return the decimal equivalent
 uint8_t parseHex(char c) {
@@ -288,7 +289,7 @@ void loop() {
         Serial.print(buffer);    //first, write it to the serial monitor
         Serial.print('#');
         
-        if (gotGPRMC)      //If we have a GPRMC string
+        if (gotGPRMC || gpscheckdisable)      //If we have a GPRMC string
         {
           // Bill Greiman - need to write bufferidx + 1 bytes to getCR/LF
           bufferidx++;
