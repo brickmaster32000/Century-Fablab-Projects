@@ -339,19 +339,25 @@ void loop() {
   
           digitalWrite(led2Pin, HIGH);      // Turn on LED 2 (indicates write to SD)
           
-          
+          //timestamp everything
           logfile.print("time: ");
           logfile.println(millis());
           Serial.println(millis());
+          xbee.print("time: ");
+          xbee.println(millis());
+          
           logfile.write((uint8_t *) buffer, bufferidx);    //write the string to the SD file
+          xbee.write((uint8_t *) buffer, bufferidx);
           
 //        Records data from other sensors while waiting for the gps.
           for(int i = 0; i < BarometerToGPSRatio; i++){
 
-            //Every reading is timestamped
+            
             logfile.print("time: ");
             logfile.println(millis());
             Serial.println(millis());
+            xbee.print("time: ");
+            xbee.println(millis());
             
             int pressure = bmp.readPressure();
             int temperature = bmp.readTemperature();
