@@ -34,14 +34,18 @@
 
 
 // Use pins 2 and 3 to talk to the GPS. 2 is the TX pin, 3 is the RX pin
+// Use pins 6 and 7 to talk to the xbee 6 is the TX pin, 7 is the RX pin
 #if ARDUINO >= 100
  SoftwareSerial gpsSerial =  SoftwareSerial(2, 3);
+ SoftwareSerial xbee = SoftwareSerial(6,7);
 #else
  NewSoftSerial gpsSerial =  NewSoftSerial(2, 3);
+ NewSoftSerial xbee = NewSoftSerial(6,7);
 #endif
 // Set the GPSRATE to the baud rate of the GPS module. Most are 4800
 // but some are 38400 or other. Check the datasheet!
 #define GPSRATE 4800
+#define XBEERATE 9600
 
 // Set the pins used 
 #define powerPin 4
@@ -49,22 +53,31 @@
 #define led2Pin 6
 #define chipSelect 10
 #define BUFFSIZE 90
-Adafruit_BMP085 bmp;
-char buffer[BUFFSIZE];
+
+
+
+char buffer[BUFFSIZE]; //Used to store various strings troughout the program; file names, gps data, parsing data, etc
 uint8_t bufferidx = 0;
 bool fix = false; // current fix data
 bool gotGPRMC;    //true if current data is a GPRMC strinng
 uint8_t i;
-File logfile;
-File dumpfile;
+
+Adafruit_BMP085 bmp; //Object used to communicate with the barometer using the Adafruit Barometer library
+File logfile; //Object used to access the SD card to write data to it.
+File dumpfile; //Object used to access the SD card and read from it to either the serial port or the xbee.
 
 const int BarometerToGPSRatio = 2; //Controls how often to poll the barometer for each gps reading
 const int AccelerometerToBarometerRatio = 20; //Controls how often to poll the accelerometers per barometer reading
 const unsigned long dataTimeout = 900000; //Time to record data in milliseconds from when program starts, 900 000 = 15 minutes
+
 boolean stringComplete = false; //toggles datadump
 boolean gpscheckdisable = true; //logs data regardless of good gps data
 
-// read a Hex value and return the decimal equivalent
+
+
+/**************************************************************************
+read a Hex value and return the decimal equivalent
+*************************************************************************/
 uint8_t parseHex(char c) {
   if (c < '0')
     return 0;
@@ -76,7 +89,10 @@ uint8_t parseHex(char c) {
     return (c - 'A')+10;
 }
 
-// blink out an error code
+
+/*****************************************************************************
+blink out an error code
+*****************************************************************************/
 void error(uint8_t errno) {
 /*
   if (SD.errorCode()) {
@@ -104,9 +120,16 @@ void error(uint8_t errno) {
 void setup() {
   WDTCSR |= (1 << WDCE) | (1 << WDE);
   WDTCSR = 0;
-  bmp.begin();
+  
+  bmp.begin(); //Initializes barometer object used to read from barometer
+  
+  
   Serial.begin(9600);
   Serial.println("\r\nGPSlogger");
+  
+  xbee.begin(XBEERATE);
+  xbee.println("\r\nGPSlogger");
+  
   pinMode(led1Pin, OUTPUT);
   pinMode(led2Pin, OUTPUT);
   pinMode(powerPin, OUTPUT);
@@ -122,12 +145,13 @@ void setup() {
     error(1);
   }
 
-  strcpy(buffer, "GPSLOG00.TXT");
- 
-// /*******************************
+
+
 // Finds the last existing logfile and creates a new one after it
 // Comment out to use the same logfile.
-// *******************************/
+
+  strcpy(buffer, "GPSLOG00.TXT");
+ 
   for (i = 0; i < 100; i++) {
     buffer[6] = '0' + i/10;
     buffer[7] = '0' + i%10;
@@ -142,6 +166,8 @@ void setup() {
 //    SD.remove(buffer);
 //    Serial.println("Deleting duplicate logfile");
 //  }
+
+
   
   logfile = SD.open(buffer, FILE_WRITE);
   if( ! logfile ) {
@@ -149,6 +175,9 @@ void setup() {
     error(3);
   }
   Serial.print("Writing to "); Serial.println(buffer);
+
+
+
   
   // connect to the GPS at the desired rate
   gpsSerial.begin(GPSRATE);
@@ -156,8 +185,11 @@ void setup() {
   Serial.println("Ready!");
   
   gpsSerial.print(SERIAL_SET);
-  delay(250);//find
+  delay(250);
 
+
+//Sends the necessary commands to toggle various NMEA sentences on and off
+//based on the defines set at the beginning of the program.
 #if (LOG_DDM == 1)
      gpsSerial.print(DDM_ON);
 #else
@@ -209,9 +241,18 @@ void setup() {
 #endif
 }
 
+
+
+/*********************************************************************************
+Main Loop
+*********************************************************************************/
 void loop() {
   
+  
+  //Data aquisition loop
   while(millis() < dataTimeout){
+    
+    
     //Serial.println(Serial.available(), DEC);
     char c;
     uint8_t sum;
@@ -219,6 +260,8 @@ void loop() {
     // read one 'line'
     if (gpsSerial.available()) {
       c = gpsSerial.read();
+      
+      
   #if ARDUINO >= 100
       //Serial.write(c);
   #else
@@ -302,12 +345,10 @@ void loop() {
           Serial.println(millis());
           logfile.write((uint8_t *) buffer, bufferidx);    //write the string to the SD file
           
-          //Records data from other sensors while waiting for the gps.
+//        Records data from other sensors while waiting for the gps.
           for(int i = 0; i < BarometerToGPSRatio; i++){
-//            int xa = analogRead(A0);
-//            int xb = analogRead(1);
-//            int yb = analogRead(A2);
-//            int zb = analogRead(A3);
+
+            //Every reading is timestamped
             logfile.print("time: ");
             logfile.println(millis());
             Serial.println(millis());
@@ -315,8 +356,7 @@ void loop() {
             int pressure = bmp.readPressure();
             int temperature = bmp.readTemperature();
             int altitude = bmp.readAltitude();
-            
-//            
+                        
             
             logfile.print("pressure: ");
             logfile.println(pressure);
@@ -330,7 +370,9 @@ void loop() {
             logfile.println();
             //Serial.println("altitude: " + String(altitude));
             
-            logfile.flush();
+            logfile.flush(); //Makes sure everything in the buffer is written to the file
+            
+            
             for(int j = 0; j < AccelerometerToBarometerRatio; j++){
               logfile.print("time: ");
               logfile.println(millis());
@@ -408,14 +450,12 @@ void loop() {
   
   Serial.println("Done recording, press 'a' to retrieve data");
   delay(250);
+  
   if(stringComplete){
     stringComplete = false;
     strcpy(buffer, "GPSLOG00.TXT");
    
-   /*******************************
-   finds the last log file and opens it for reading
-   
-   *******************************/
+    //finds the last log file and opens it for reading 
     for (i = 0; i < 100; i++) {
       buffer[6] = '0' + i/10;
       buffer[7] = '0' + i%10;
@@ -431,6 +471,7 @@ void loop() {
     else{
       buffer[7] = buffer[7] - 1;
     }
+    
     
     Serial.print("Reading from "); Serial.println(buffer);
     dumpfile = SD.open(buffer, FILE_READ);
@@ -448,17 +489,20 @@ void loop() {
 
 }
 
+
+/************************************************************
+Watches serial port for a specific command.
+When it recieves the command it sets string complete to true
+************************************************************/
 void serialEvent() {
   while (Serial.available()) {
-    // get the new byte:
     char inChar = (char)Serial.read(); 
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
     if (inChar == 'a') {
       stringComplete = true;
     } 
   }
 }
+
 
 void sleep_sec(uint16_t x) {
   while (x--) {
