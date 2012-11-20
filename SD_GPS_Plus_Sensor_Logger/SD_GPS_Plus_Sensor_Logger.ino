@@ -34,18 +34,16 @@
 
 
 // Use pins 2 and 3 to talk to the GPS. 2 is the TX pin, 3 is the RX pin
-// Use pins 6 and 7 to talk to the xbee 6 is the TX pin, 7 is the RX pin
+
 #if ARDUINO >= 100
  SoftwareSerial gpsSerial =  SoftwareSerial(2, 3);
- SoftwareSerial xbee = SoftwareSerial(6,7);
 #else
  NewSoftSerial gpsSerial =  NewSoftSerial(2, 3);
- NewSoftSerial xbee = NewSoftSerial(6,7);
 #endif
 // Set the GPSRATE to the baud rate of the GPS module. Most are 4800
 // but some are 38400 or other. Check the datasheet!
 #define GPSRATE 4800
-#define XBEERATE 9600
+
 
 // Set the pins used 
 #define powerPin 4
@@ -127,8 +125,6 @@ void setup() {
   Serial.begin(9600);
   Serial.println("\r\nGPSlogger");
   
-  xbee.begin(XBEERATE);
-  xbee.println("\r\nGPSlogger");
   
   pinMode(led1Pin, OUTPUT);
   pinMode(led2Pin, OUTPUT);
@@ -343,11 +339,10 @@ void loop() {
           logfile.print("time: ");
           logfile.println(millis());
           Serial.println(millis());
-          xbee.print("time: ");
-          xbee.println(millis());
+          
           
           logfile.write((uint8_t *) buffer, bufferidx);    //write the string to the SD file
-          xbee.write((uint8_t *) buffer, bufferidx);
+
           
 //        Records data from other sensors while waiting for the gps.
           for(int i = 0; i < BarometerToGPSRatio; i++){
@@ -356,8 +351,7 @@ void loop() {
             logfile.print("time: ");
             logfile.println(millis());
             Serial.println(millis());
-            xbee.print("time: ");
-            xbee.println(millis());
+
             
             int pressure = bmp.readPressure();
             int temperature = bmp.readTemperature();
@@ -399,7 +393,7 @@ void loop() {
            
              logfile.print("y: ");
              logfile.println(yb);
-             //Serial.println("yb: " + String(yb));
+            // Serial.println("yb: " + String(yb));
           
              logfile.print("z: ");
              logfile.println(zb);
