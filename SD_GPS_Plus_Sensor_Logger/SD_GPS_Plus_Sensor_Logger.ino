@@ -360,15 +360,15 @@ void loop() {
             
             logfile.print("pressure: ");
             logfile.println(pressure);
-            //Serial.println("pressure: " + String(pressure));
+            //Serial.print("Pressure: ");Serial.println(pressure);
             
             logfile.print("temp: ");
             logfile.println(temperature);
-            //Serial.println("temperature: " + String(temperature));
+            //Serial.print("Temperature: ");Serial.println(temperature);
             
             logfile.print("altitude: ");
-            logfile.println();
-            //Serial.println("altitude: " + String(altitude));
+            logfile.println(altitude);
+            //Serial.print("Altitude: ");Serial.println(altitude);
             
             logfile.flush(); //Makes sure everything in the buffer is written to the file
             
@@ -385,19 +385,19 @@ void loop() {
 
               logfile.print("x: ");
               logfile.println(xa);
-              //Serial.println("xa: " + String(xa));
+              Serial.print("X1: ");Serial.println(xa);
            
              logfile.print("x: ");
              logfile.println(xb);
-             //Serial.println("xb: " + String(xb));
+             Serial.print("X2: ");Serial.println(xb);
            
              logfile.print("y: ");
              logfile.println(yb);
-            // Serial.println("yb: " + String(yb));
+             Serial.print("Y2: ");Serial.println(yb);
           
              logfile.print("z: ");
              logfile.println(zb);
-             //Serial.println("zb: " + String(zb));
+             Serial.print("Z2: ");Serial.println(zb);
              logfile.flush();
             }
           }
