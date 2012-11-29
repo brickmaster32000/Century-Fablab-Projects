@@ -70,7 +70,7 @@ const unsigned long dataTimeout = 900000; //Time to record data in milliseconds 
 
 boolean stringComplete = false; //toggles datadump
 boolean gpscheckdisable = true; //logs data regardless of good gps data
-
+boolean timeoutDisable = true; //Disable the timeout condition and keeps logging until powerdown
 
 
 /**************************************************************************
@@ -246,7 +246,7 @@ void loop() {
   
   
   //Data aquisition loop
-  while(millis() < dataTimeout){
+  while(timeoutDisable || (millis() < dataTimeout)){
     
     
     //Serial.println(Serial.available(), DEC);
@@ -376,7 +376,7 @@ void loop() {
             for(int j = 0; j < AccelerometerToBarometerRatio; j++){
               logfile.print("time: ");
               logfile.println(millis());
-              Serial.println(millis());
+              //Serial.println(millis());
               
               int xa = analogRead(A0);
               int xb = analogRead(1);
@@ -385,20 +385,29 @@ void loop() {
 
               logfile.print("x: ");
               logfile.println(xa);
-              Serial.print("X1: ");Serial.println(xa);
+              //Serial.print("X1: ");Serial.println(xa);
            
              logfile.print("x: ");
              logfile.println(xb);
-             Serial.print("X2: ");Serial.println(xb);
+             //Serial.print("X2: ");Serial.println(xb);
            
              logfile.print("y: ");
              logfile.println(yb);
-             Serial.print("Y2: ");Serial.println(yb);
+             //Serial.print("Y2: ");Serial.println(yb);
           
              logfile.print("z: ");
              logfile.println(zb);
-             Serial.print("Z2: ");Serial.println(zb);
+             //Serial.print("Z2: ");Serial.println(zb);
              logfile.flush();
+             
+             //Only prints last set of accelerometer readings
+             if(j == (AccelerometerToBarometerRatio - 1)){
+               Serial.println(millis());
+               Serial.print("X1: ");Serial.println(xa);
+               Serial.print("X2: ");Serial.println(xb);
+               Serial.print("Y2: ");Serial.println(yb);
+               Serial.print("Z2: ");Serial.println(zb);
+             }
             }
           }
           logfile.flush();
