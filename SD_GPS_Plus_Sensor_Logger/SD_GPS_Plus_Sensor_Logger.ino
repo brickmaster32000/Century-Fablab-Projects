@@ -348,7 +348,7 @@ void loop() {
           for(int i = 0; i < BarometerToGPSRatio; i++){
 
             
-            logfile.print("time: ");
+            logfile.print("time,");
             logfile.println(millis());
             Serial.println(millis());
 
@@ -358,15 +358,15 @@ void loop() {
             int altitude = bmp.readAltitude();
                         
             
-            logfile.print("pressure: ");
+            logfile.print("pressure,");
             logfile.println(pressure);
             //Serial.print("Pressure: ");Serial.println(pressure);
             
-            logfile.print("temp: ");
+            logfile.print("temp,");
             logfile.println(temperature);
             //Serial.print("Temperature: ");Serial.println(temperature);
             
-            logfile.print("altitude: ");
+            logfile.print("altitude,");
             logfile.println(altitude);
             //Serial.print("Altitude: ");Serial.println(altitude);
             
@@ -374,7 +374,7 @@ void loop() {
             
             
             for(int j = 0; j < AccelerometerToBarometerRatio; j++){
-              logfile.print("time: ");
+              logfile.print("time,");
               logfile.println(millis());
               Serial.println(millis());
               
@@ -383,19 +383,19 @@ void loop() {
               int yb = analogRead(A2);
               int zb = analogRead(A3);
 
-              logfile.print("x: ");
+              logfile.print("x1,");
               logfile.println(xa);
               Serial.print("X1: ");Serial.println(xa);
            
-             logfile.print("x: ");
+             logfile.print("x2,");
              logfile.println(xb);
              Serial.print("X2: ");Serial.println(xb);
            
-             logfile.print("y: ");
+             logfile.print("y2");
              logfile.println(yb);
              Serial.print("Y2: ");Serial.println(yb);
           
-             logfile.print("z: ");
+             logfile.print("z2,");
              logfile.println(zb);
              Serial.print("Z2: ");Serial.println(zb);
              logfile.flush();
