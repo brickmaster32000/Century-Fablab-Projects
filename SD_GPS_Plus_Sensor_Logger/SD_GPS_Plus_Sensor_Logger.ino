@@ -70,6 +70,7 @@ const unsigned long dataTimeout = 900000; //Time to record data in milliseconds 
 
 boolean stringComplete = false; //toggles datadump
 boolean gpscheckdisable = true; //logs data regardless of good gps data
+boolean timeoutDisable = true; //disable the timout
 
 
 
@@ -246,7 +247,7 @@ void loop() {
   
   
   //Data aquisition loop
-  while(millis() < dataTimeout){
+  while(dataTimeout || millis() < dataTimeout){
     
     
     //Serial.println(Serial.available(), DEC);
@@ -350,7 +351,7 @@ void loop() {
             
             logfile.print("time,");
             logfile.println(millis());
-            Serial.println(millis());
+            Serial.print("Time,");Serial.println(millis());
 
             
             int pressure = bmp.readPressure();
@@ -360,15 +361,15 @@ void loop() {
             
             logfile.print("pressure,");
             logfile.println(pressure);
-            //Serial.print("Pressure: ");Serial.println(pressure);
+            Serial.print("Pressure,");Serial.println(pressure);
             
             logfile.print("temp,");
             logfile.println(temperature);
-            //Serial.print("Temperature: ");Serial.println(temperature);
+            Serial.print("Temperature,");Serial.println(temperature);
             
             logfile.print("altitude,");
             logfile.println(altitude);
-            //Serial.print("Altitude: ");Serial.println(altitude);
+            Serial.print("Altitude,");Serial.println(altitude);
             
             logfile.flush(); //Makes sure everything in the buffer is written to the file
             
@@ -376,7 +377,7 @@ void loop() {
             for(int j = 0; j < AccelerometerToBarometerRatio; j++){
               logfile.print("time,");
               logfile.println(millis());
-              Serial.println(millis());
+              Serial.print("Time,");Serial.println(millis());
               
               int xa = analogRead(A0);
               int xb = analogRead(1);
@@ -385,19 +386,19 @@ void loop() {
 
               logfile.print("x1,");
               logfile.println(xa);
-              Serial.print("X1: ");Serial.println(xa);
+              Serial.print("X1,");Serial.println(xa);
            
              logfile.print("x2,");
              logfile.println(xb);
-             Serial.print("X2: ");Serial.println(xb);
+             Serial.print("X2,");Serial.println(xb);
            
              logfile.print("y2");
              logfile.println(yb);
-             Serial.print("Y2: ");Serial.println(yb);
+             Serial.print("Y2,");Serial.println(yb);
           
              logfile.print("z2,");
              logfile.println(zb);
-             Serial.print("Z2: ");Serial.println(zb);
+             Serial.print("Z2,");Serial.println(zb);
              logfile.flush();
             }
           }
