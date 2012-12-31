@@ -1,13 +1,13 @@
-loglocation = r"C:\Users\Mlah\Downloads" #Path where the log file is saved
-savelocation = r"C:\Users\Mlah\Downloads" #Path to create new files
+loglocation = r"C:\Users\Jacob\Desktop" #Path where the log file is saved
+savelocation = r"C:\Users\Jacob\Desktop" #Path to create new files
 
 #Names of the files
-logname = "LOG12_8_2012"
+logname = "LOG"
 accelname = "AccelerationData"
 gpsname = "GPSData"
 barometername = "BarometerData"
 
-logfile = open(r"{0}\{1}.csv".format(savelocation, logname), 'r')
+logfile = open(r"{0}\{1}.txt".format(savelocation, logname), 'r')
 accelData = open(r"{0}\{1}.csv".format(savelocation, accelname), 'w')
 gpsData = open(r"{0}\{1}.csv".format(savelocation, gpsname), 'w')
 barometerData = open(r"{0}\{1}.csv".format(savelocation, barometername), 'w')
