@@ -6,7 +6,6 @@
 
 
 #include <Adafruit_GPS.h>
-#include <SoftwareSerial.h>
 
 // Connect the GPS Power pin to 5V
 // Connect the GPS Ground pin to ground
@@ -30,7 +29,7 @@ void setup()
   GPS.begin(9600);
   
   //Tell GPS to send us the GGA string.
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_GGA);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   //Tell GPS to send us data at 10Hz rate
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
 
@@ -45,7 +44,7 @@ void loop()                     // run over and over again
   // If using hardware serial (e.g. Arduino Mega), change this to Serial1, etc.
   if (Serial1.available()) {
     char c = Serial1.read();
-      if (c) UDR0 = c;
+      if (c) Serial.print(c);
       // writing direct to UDR0 is much much faster than Serial.print 
       // but only one character can be written at a time.
   }
