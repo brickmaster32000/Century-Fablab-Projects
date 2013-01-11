@@ -4,7 +4,6 @@
 // turns off when power is lost, so you MUST turn it on every time
 // you want to use it!
 
-
 #include <Adafruit_GPS.h>
 
 // Connect the GPS Power pin to 5V
@@ -30,8 +29,8 @@ void setup()
   
   //Tell GPS to send us the GGA string.
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  //Tell GPS to send us data at 10Hz rate
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
+  //Tell GPS to send us data at 5Hz rate
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);
 
   Serial1.read();
 
