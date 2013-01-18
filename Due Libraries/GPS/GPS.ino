@@ -3,26 +3,31 @@ class GPS{
     GPS(USARTClass *ser);
     GPS(UARTClass *ser);
     void begin(long baud);
-    void println(char *str);
+    void println(char *str); //Prints to the serial port.
+    char readChar(); //Reads one char at a time for debugging.
   private:
     void init(); //Sets up default values
-    USARTClass *_serialPort; //Serial1 - Serial3 are USARTClass objects, Serial is a UARTClass object
-    UARTClass *_usbPort;
+    USARTClass *_serialPort; //Serial1 - Serial3 are USARTClass objects.
+    UARTClass *_usbPort;  //Serial is a UARTClass object and output is mirrored to the usb
 };
 
-GPS foo(&Serial);
-GPS bar(&Serial1);
 
+GPS bar(&Serial1);
+char c = 0;
 
 void setup(){
-  foo.begin(9600);
+  Serial.begin(115200);
+  
   bar.begin(9600);
+  bar.println("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
+  //bar.println("$PMTK220,200*2C");
 }
 
 void loop(){
-  foo.println("Hello USB!");
-  bar.println("Hello XBEE!");
-  delay(500);
+  c = bar.readChar();
+  if(c != 0){
+    Serial.print(c);
+  }
 }
 
 GPS::GPS(USARTClass *ser){
@@ -56,5 +61,21 @@ void GPS::println(char *str){
     _serialPort->println(str);
   }else{
     _usbPort->println(str);
+  }
+}
+
+char GPS::readChar(){
+  if(_serialPort){ 
+    if(_serialPort->available()){
+      return _serialPort->read();
+    }else{ //If nothing is in the buffer return 0.
+      return 0; 
+    }
+  }else{
+    if(_usbPort->available()){
+      return _usbPort->read();
+    }else{ //If nothing is in the buffer return 0.
+      return 0;
+    }
   }
 }
