@@ -1,3 +1,7 @@
+/***********************Header Section***********************************************/
+#define MAXSIZE 90 
+
+
 class GPS{
   public:
     GPS(USARTClass *ser);
@@ -5,11 +9,16 @@ class GPS{
     void begin(long baud);
     void println(char *str); //Prints to the serial port.
     char readChar(); //Reads one char at a time for debugging.
+    int buildCompleteNMEAString(int timeout); //Waits for the begining of a NMEA string and then gatheres the entire string
+    char incomingNMEAString[MAXSIZE];
   private:
+     
     void init(); //Sets up default values
     USARTClass *_serialPort; //Serial1 - Serial3 are USARTClass objects.
     UARTClass *_usbPort;  //Serial is a UARTClass object and output is mirrored to the usb
 };
+/*******************Test Program*********************************************************/
+
 
 
 GPS bar(&Serial1);
@@ -20,15 +29,18 @@ void setup(){
   
   bar.begin(9600);
   bar.println("$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29");
-  //bar.println("$PMTK220,200*2C");
+  bar.println("$PMTK220,200*2C");
 }
 
 void loop(){
-  c = bar.readChar();
-  if(c != 0){
-    Serial.print(c);
+  if(bar.buildCompleteNMEAString(3000)){
+    Serial.print(bar.incomingNMEAString);
   }
 }
+
+
+/******************************function declerations ******************************/
+
 
 GPS::GPS(USARTClass *ser){
   init();
@@ -79,3 +91,37 @@ char GPS::readChar(){
     }
   }
 }
+
+int GPS::buildCompleteNMEAString(int timeout){
+  unsigned long startTime = millis();
+  int i = 0;
+  char c = 0;
+  
+  while(millis() < (startTime + timeout) && i < (MAXSIZE - 2)){
+    if(_serialPort){
+      while(!_serialPort->available())
+        ; //Wait for data
+      c = _serialPort->read();
+    }else{
+      while(!_usbPort->available())
+        ; //Wait for data
+      c = _usbPort->read();
+    }
+    
+    if(i == 0 && c == '$'){
+      incomingNMEAString[i++] = c; 
+    }else if(i != 0){ //Only add to string after we grap the '$'
+     incomingNMEAString[i++] = c;      
+    }
+    
+    if(c == '\n' && i != 0){ //We have hit the end of the NMEA string; null terminate it and return.
+      incomingNMEAString[i] = '\0';
+      return 1;
+    }
+  }
+  return 0; //Timed out
+}
+    
+      
+    
+  
