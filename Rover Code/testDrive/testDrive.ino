@@ -1,3 +1,70 @@
+double lastLatitude = 0;
+double lastLongitude = 0;
+
+double currentLatitude = 0;
+double currentLongitude = 0;
+
+double destinationLatitude = 32541;
+double destinationLongitude =4523;
+
+double currentAngle = 0;
+double destinationAngle = 0;
+
+boolean inAir = true;
+boolean atDestination = false;
+
+long checkDelay = 20000; //time between orientation checks after initial test drive in milliseconds
+const double TOLERANCE = .0011 //set to 2m which is estimated GPS error
+
+void loop(){
+  
+  while(inAir){
+    
+  };
+  
+  currentAngle = testDrive(10000);
+  destinationAngle = atan2((destinationLatitude - currentLatitude), (destinationLongitude - currentLongitude));
+  turnRadians(destinationAngle - currentAngle); // psuedo code to turn rover so many radians.
+  
+  lastLatitude = currentLatitude;
+  lastLongitude = currentLongitude;
+  
+    
+  /************************************************************************************
+  Drive for a while, then check the Rover's current orientation against
+  the destination angle and corrects angle if necessary
+  ************************************************************************************/  
+  while(!atDestination){
+    driveStraight(); //psuedocode to drive rover straight
+    
+    time = millis();
+    while(millis() - time < checkDelay)
+      ; // drive straight until outside of gps error range
+    
+    driveStop(); //psuedocode to stop rover
+    while(!gps.newNMEARecieved()) 
+      ; //While no new gps recieved keep looping
+    gps.parse(lastNMEA());  
+    currentLatidtude = gps.latitude;
+    currentLongitude = gps.longtiude;
+    
+    currentAngle = atan2((currentLatitude - lastLatitude), (currentLongitude - lastLongitude)); 
+    destinationAngle = atan2((destinationLatitude - currentLatitude), (destinationLongitude - currentLongitude));
+    turnRadians(destinationAngle - currentAngle); // psuedo code to turn rover so many radians.
+    
+    lastLatitude = currentLatitude;
+    lastLongitude = currentLongitude;
+    
+    if((currentLatitude - destinationLatitude) < TOLERANCE && (currentLongitude - destinationLongitude) < TOLERANCE){
+      atDestination = true;
+    }
+  
+  }
+  
+  
+  
+}
+
 
 
 /*************************************************************************************************
@@ -12,8 +79,8 @@ double testDrive(long driveTime){
   while(!gps.newNMEARecieved()) 
     ; //While no new gps recieved keep looping
   gps.parse(lastNMEA());  
-  double latitudeOrigin = gps.latitude;
-  double longitudeOrigin = gps.longtiude;
+  lastLatidtude = gps.latitude;
+  lastLongitude = gps.longtiude;
   long time = millis();
   
   driveStraight(); //psuedocode to drive rover straight 
@@ -24,10 +91,9 @@ double testDrive(long driveTime){
   while(!gps.newNMEARecieved()) 
     ; //While no new gps recieved keep looping
   gps.parse(lastNMEA());
-  double latitudeNew = gps.latitude;
-  double longitudeNew = gps.longitude;
+  currentLatitude = gps.latitude;
+  currentLatitude = gps.longitude;
   
-  return atan2((latitudeNew - latitudeOrigin), (longitudeNew - longitudeOrigin));  
+  return atan2((currentLatitude - lastLatitude), (currentLongitude - lastLongitude));  
 }
- 
 
