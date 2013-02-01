@@ -1,3 +1,4 @@
+
 #include <GPS.h>
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
@@ -23,8 +24,7 @@ int zB = A7;
 
 int proximity = A8;
 int brakeDist = proximity;
-
-boolean altCheck(int);
+int descent = 2;
 
 void setup(){
   Serial.begin(115200);
@@ -36,14 +36,15 @@ void setup(){
   gps.println(PMTK_SET_NMEA_OUTPUT_GGAONLY);
   gps.println(PMTK_SET_NMEA_UPDATE_5HZ);
   
+  delay(500);
+  
                //1,  2  ,3, 4,5, 6,7, 8,9, 10  ,11,12,13,14,15,16,    17    ,     18    ,    19    ,   20   ,    21   ,  
   Serial.println(",TimeA, ,xA, ,yA, ,zA, ,TimeB,  ,xB,  ,yB,  ,zB, TimeBrake, BrakePosit, Activated, TimeBar, Altitude, ,TimeGPS, Latitude,, Longitude,,Quality,SAT#,,AltitudeGPS,,,,"); // Include headers at the top of the file for csv ease
 }
 
 void loop(){
-  int altitude = 1;
-  
-  if(altCheck(altitude) == true){
+    
+  if(descent > 0){
     while(!gps.buildCompleteNMEAString(3000))
       ;
     Serial.print(",,,,,,,,,,,,,,,,,,,,,");Serial.print(gps.verifiedNMEAString);
@@ -52,11 +53,20 @@ void loop(){
     Serial.print(",,,,,,,,,,,,,,,,,,,,,");Serial.print(gps.verifiedNMEAString);
   }
 
-  for(int i = 0; i < baromToGPS; i++);{
+  for(int i = 0; i < baromToGPS; i++){
+    int prevAlt = 0, altitude;
+    
     //Print the barometer output
     Serial.print(",,,,,,,,,,,,,,,,,,,");Serial.print(millis()); // place the beginning of the barometer readout in it's place, 8 cells to the right
-    altitude = bmp.readAltitude();
+    
+    altitude = bmp.readAltitude();    
     Serial.print(",");Serial.println(altitude);
+    if(i == 0){
+      prevAlt = altitude;
+    }
+    if(i == (baromToGPS-1)){
+      descent = (prevAlt - altitude);
+    }
   
     //Print accelerometer data and drag brake when not printing any other sensors
     for(int j = 0; j < accelToBaromRatio; j++){
@@ -82,15 +92,4 @@ void loop(){
       }
     }
   }
-}
-
-boolean altCheck(int curAlt){
-  int prevAlt=0;
-  
-  if(curAlt-prevAlt>5){
-    return true;}
-  else{
-    prevAlt = curAlt;
-    return false;}
-  
 }
