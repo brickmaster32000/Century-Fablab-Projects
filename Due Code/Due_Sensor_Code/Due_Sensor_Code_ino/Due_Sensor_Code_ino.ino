@@ -11,6 +11,7 @@ const int baromToGPS = 2;
 const int accelToBaromRatio = 70; // maybe half a second based on the 
 
 const int ACTIVATION = 200;
+const int BSM = .5; //barometer safety margin
 
 boolean brake = false;
 
@@ -22,12 +23,13 @@ int xB = A5;
 int yB = A6;
 int zB = A7;
 
+int maxAlt = 0;
 int proximity = A8;
 int brakeDist = proximity;
-int descent = 2;
+boolean descent = false;
 
 void setup(){
-  Serial.begin(115200);
+  Serial.begin(9600);
   gps.begin(9600);
   bmp.begin();
  
@@ -44,7 +46,7 @@ void setup(){
 
 void loop(){
     
-  if(descent > 0){
+  if(descent){
     while(!gps.buildCompleteNMEAString(3000))
       ;
     Serial.print(",,,,,,,,,,,,,,,,,,,,,");Serial.print(gps.verifiedNMEAString);
@@ -54,19 +56,20 @@ void loop(){
   }
 
   for(int i = 0; i < baromToGPS; i++){
-    int prevAlt = 0, altitude;
+    int altitude;
     
     //Print the barometer output
     Serial.print(",,,,,,,,,,,,,,,,,,,");Serial.print(millis()); // place the beginning of the barometer readout in it's place, 8 cells to the right
     
     altitude = bmp.readAltitude();    
     Serial.print(",");Serial.println(altitude);
-    if(i == 0){
-      prevAlt = altitude;
+    if(maxAlt < altitude){
+      maxAlt = altitude;
     }
-    if(i == (baromToGPS-1)){
-      descent = (prevAlt - altitude);
-    }
+    else if(altitude < (maxAlt-BSM)){
+     descent = true;
+    };
+    
   
     //Print accelerometer data and drag brake when not printing any other sensors
     for(int j = 0; j < accelToBaromRatio; j++){
