@@ -1,3 +1,8 @@
+int const AIRBRAKEDELAY = 2000;// TIme to wait after detecting burnout to deploy brake.
+int const TRIGGER = 1520; //Value to stardrag brake deployment from. 
+
+int const YA = A0;
+
 int const ledPin = 7;
 int const motorControl = 6;
 int const ledButton = 5;
@@ -14,6 +19,8 @@ void setup(){
   
   digitalWrite(ledPin, LOW);
   digitalWrite(motorControl, LOW);
+  
+  analogReadResolution(12);
 }
 
 void loop(){
@@ -30,6 +37,15 @@ void loop(){
   armed = true;
   digitalWrite(ledPin, HIGH);
   
-  delay(100);
+  while(analogRead(YA) > TRIGGER){} //Idle until a negative acceleration is detected.
+  
+  delay(AIRBRAKEDELAY);
+  
+  analogWrite(motorControl, 255);
+  delay(1000);
+  analogWrite(motorControl, 0);
+  
+  while(true){} //Air brake has been deployed; idle till reset.
+  
     
 }
