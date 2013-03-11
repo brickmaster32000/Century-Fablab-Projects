@@ -8,7 +8,7 @@ Adafruit_BMP085 bmp;
 
 // the ratios are not final, they need to be tuned to a realistic value
 const int baromToGPS = 2;
-const int accelToBaromRatio = 65; // maybe half a second based on the 
+const int accelToBaromRatio = 10; // maybe half a second based on data received. 
 
 const int ACTIVATION = 200;
 const int BSM = .5; //barometer safety margin
@@ -55,14 +55,14 @@ void loop(){
 //    Serial.print(",,,,,,,,,,,,,,,,,,,,,");Serial.print(gps.verifiedNMEAString);
 //  }
 
-  for(int i = 0; i < baromToGPS; i++){
-    int altitude;
+  //for(int i = 0; i < baromToGPS; i++){
+//    int altitude;
     
     //Print the barometer output
     Serial.print(",,,,,,,,,,,,,,,,,,,");Serial.print(millis()); // place the beginning of the barometer readout in it's place, 8 cells to the right
     
-    altitude = bmp.readAltitude();    
-    Serial.print(",");Serial.println(altitude);
+//    altitude = bmp.readAltitude();    
+    Serial.print(",");Serial.println(bmp.readAltitude());
 //    if(maxAlt < altitude){
 //      maxAlt = altitude;
 //    }
@@ -94,5 +94,5 @@ void loop(){
 //        Serial.print(",");Serial.println("Activated");
 //      }
     }
-  }
+//  }
 }

@@ -5,7 +5,7 @@
 GPS gps(&Serial1);
 
 // the ratios are not final, they need to be tuned to a realistic value
-const int accelToGPS = 400;
+const int accelToGPS = 143;
 const int ACTIVATION = 200;
  
 int xA = A2;
@@ -18,6 +18,8 @@ int zB = A7;
 
 int proximity = A8;
 int brakeDist = proximity;
+
+boolean brake = false;
 
 
 void setup(){
@@ -33,9 +35,9 @@ void setup(){
   
                //1,  2  ,3, 4,5, 6,7, 8,9, 10  ,11,12,13,14,15,16,    17    ,     18    ,    19    ,   20   ,    21   ,  
   Serial.println(",TimeA, ,xA, ,yA, ,zA, ,TimeB,  ,xB,  ,yB,  ,zB, TimeBrake, BrakePosit, Activated, TimeBar, Altitude, ,TimeGPS, Latitude,, Longitude,,Quality,SAT#,,AltitudeGPS,,,,"); // Include headers at the top of the file for csv ease
-  }
+}
   
-  void loop(){
+void loop(){
   
   
   while(!gps.buildCompleteNMEAString(3000))
@@ -66,7 +68,6 @@ void setup(){
       Serial.print(",,,,,,,,,,,,,,,,,");Serial.print(millis());
       Serial.print(",");Serial.print(brakeDist);
       Serial.print(",");Serial.println("Activated");
-      }
     }
   }
 }
