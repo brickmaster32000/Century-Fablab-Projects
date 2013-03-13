@@ -56,7 +56,7 @@ void accelerometerRead(int offset){
   Serial.print(",xB,");Serial.print(analogRead(xB));
   Serial.print(",yB,");Serial.print(analogRead(yB));
   Serial.print(",zB,");Serial.print(analogRead(zB));
-  Serial.print(",BrakePosit,");Serial.println(brakeDist);
+  Serial.print(",BrakePosit,");Serial.println(analogRead(proximity));
 }
 
 void barometerRead(int offset){
