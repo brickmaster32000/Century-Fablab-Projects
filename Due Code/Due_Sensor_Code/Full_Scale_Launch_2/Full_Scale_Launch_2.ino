@@ -6,6 +6,11 @@ void accelerometerRead(int offset);
 void barometerRead(int offset);
 void GPSRead(int offset);
 
+double findApogee(double v0, double y0);
+
+double vt; //terminal velocity
+double g; //gravitiational acceleration
+double targetHeight;
 GPS gps(&Serial1);
 Adafruit_BMP085 bmp;
 
@@ -63,10 +68,36 @@ void setup(){
 }
 
 void loop(){
-  for(int i = 0; i < accelToBaromRatio; i++){
-    accelerometerRead(0);
+  //Gets two seperate
+  int altitude = 0;
+  long time[4]; //holds beginning and end time of altitude samples
+  
+  time[0] = millis();
+  for(int i = 0; i < 5; i++){
+    altitude += bmp.readAltitude();
   }
-  barometerRead(12);
+  altitudeStart = altitude / 5;
+  time[1] = millis();
+  
+  delay(500);
+  altitude = 0;
+  
+  time[2] = millis();
+  for(int i = 0; i < 5; i++){
+    altitude += bmp.readAltitude();
+  }
+  altitudeEnd = altitude / 5;
+  time[3] = millis();
+  
+  double velocity = (altitudeEnd - altitudeStart)/(((time[3]-time[2])/2)-((time[1]-time[0])/2))
+  double apogee = findApogee(velocity, altitudeEnd);
+  
+  if(apogee >= targetHeight){
+    analogWrite(motorControl, 255);
+    delay(1000);
+    analogWrite(motorControl, 0);
+  }
+  
 }
 
 /******************************************************************************
@@ -95,5 +126,7 @@ void barometerRead(int offset){
   Serial.print(",Altitude,");Serial.println(bmp.readAltitude());
 }
   
-  
+double findApogee(double v0, double y0){
+  return y0 + ((vt^2)/(2 * g))* log(((v0^2)+(vt^2))/(vt^2));
+}
   
