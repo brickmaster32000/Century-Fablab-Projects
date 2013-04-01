@@ -93,7 +93,7 @@ void accelerometerRead(int offset){
   }
   Serial.print(index++);
   Serial.print("TimeB,");Serial.print(millis());
-  Serial.print(",xB,");Serial.print(analogRead(xB));
+  Serial.print(",yB,");Serial.print(analogRead(yB));
   Serial.print(",BrakePosit,");Serial.println(analogRead(proximity));
 }
 
