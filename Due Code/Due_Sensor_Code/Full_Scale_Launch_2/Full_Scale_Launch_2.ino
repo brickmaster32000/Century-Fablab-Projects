@@ -1,6 +1,7 @@
 #include <GPS.h>
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
+#include <math.h>
 
 void accelerometerRead(int offset);
 void barometerRead(int offset);
@@ -69,14 +70,14 @@ void setup(){
 
 void loop(){
   //Gets two seperate
-  int altitude = 0;
+  float altitude = 0;
   long time[4]; //holds beginning and end time of altitude samples
   
   time[0] = millis();
   for(int i = 0; i < 5; i++){
     altitude += bmp.readAltitude();
   }
-  altitudeStart = altitude / 5;
+  float altitudeStart = altitude / 5;
   time[1] = millis();
   
   delay(500);
@@ -86,10 +87,10 @@ void loop(){
   for(int i = 0; i < 5; i++){
     altitude += bmp.readAltitude();
   }
-  altitudeEnd = altitude / 5;
+  float altitudeEnd = altitude / 5;
   time[3] = millis();
   
-  double velocity = (altitudeEnd - altitudeStart)/(((time[3]-time[2])/2)-((time[1]-time[0])/2))
+  double velocity = (altitudeEnd - altitudeStart)/(((time[3]-time[2])/2)-((time[1]-time[0])/2));
   double apogee = findApogee(velocity, altitudeEnd);
   
   if(apogee >= targetHeight){
@@ -127,6 +128,6 @@ void barometerRead(int offset){
 }
   
 double findApogee(double v0, double y0){
-  return y0 + ((vt^2)/(2 * g))* log(((v0^2)+(vt^2))/(vt^2));
+  return y0 + (pow(vt, 2)/(2 * g))* log10((pow(v0, 2)+pow(vt, 2))/pow(vt,2));
 }
   
