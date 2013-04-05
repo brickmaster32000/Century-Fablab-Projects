@@ -1,3 +1,8 @@
+#include <GPS.h>
+ 
+GPS gps(&Serial);
+char c = 0;
+
 double lastLatitude = 0;
 double lastLongitude = 0;
 
@@ -5,7 +10,7 @@ double currentLatitude = 0;
 double currentLongitude = 0;
 
 double destinationLatitude = 32541;
-double destinationLongitude =4523;
+double destinationLongitude = 4523;
 
 double currentAngle = 0;
 double destinationAngle = 0;
@@ -14,7 +19,22 @@ boolean inAir = true;
 boolean atDestination = false;
 
 long checkDelay = 20000; //time between orientation checks after initial test drive in milliseconds
-const double TOLERANCE = .0011 //set to 2m which is estimated GPS error
+const double TOLERANCE = .0011; //set to 2m which is estimated GPS error
+
+//set drive signals to pins
+int driveR = 7;
+int driveL = 6;
+
+void setup(){
+  //change driveR and driveL to ouput pins
+  pinMode(driveR, OUTPUT); 
+  pinMode(driveL, OUTPUT);
+  
+  gps.begin(9600);
+  gps.println(PMTK_SET_NMEA_OUTPUT_GGAONLY);
+  gps.println(PMTK_SET_NMEA_UPDATE_5HZ);
+
+}
 
 void loop(){
   
@@ -35,17 +55,17 @@ void loop(){
   the destination angle and corrects angle if necessary
   ************************************************************************************/  
   while(!atDestination){
-    driveStraight(); //psuedocode to drive rover straight
+    driveStraight(); //code to drive rover straight
     
     time = millis();
     while(millis() - time < checkDelay)
       ; // drive straight until outside of gps error range
     
-    driveStop(); //psuedocode to stop rover
+    driveStop(); //code to stop rover
     while(!gps.newNMEARecieved()) 
       ; //While no new gps recieved keep looping
     gps.parse(lastNMEA());  
-    currentLatidtude = gps.latitude;
+    currentLatitude = gps.latitude;
     currentLongitude = gps.longtiude;
     
     currentAngle = atan2((currentLatitude - lastLatitude), (currentLongitude - lastLongitude)); 
@@ -79,7 +99,7 @@ double testDrive(long driveTime){
   while(!gps.newNMEARecieved()) 
     ; //While no new gps recieved keep looping
   gps.parse(lastNMEA());  
-  lastLatidtude = gps.latitude;
+  lastLatitude = gps.latitude;
   lastLongitude = gps.longtiude;
   long time = millis();
   
@@ -97,3 +117,12 @@ double testDrive(long driveTime){
   return atan2((currentLatitude - lastLatitude), (currentLongitude - lastLongitude));  
 }
 
+void driveStraight(){
+  digitalWrite(driveR, HIGH);
+  digitalWrite(driveR, HIGH);
+}
+
+void driveStop(){
+  digitalWrite(driveR, LOW);
+  digitalWrite(driveR, LOW); 
+}
