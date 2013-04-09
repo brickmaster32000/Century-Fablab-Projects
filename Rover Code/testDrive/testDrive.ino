@@ -21,14 +21,24 @@ boolean atDestination = false;
 long checkDelay = 20000; //time between orientation checks after initial test drive in milliseconds
 const double TOLERANCE = .0011; //set to 2m which is estimated GPS error
 
+//create switch value for orientation to control which direction the wheels spin
+int orientation = 0;
 //set drive signals to pins
-int driveR = 7;
-int driveL = 6;
+int driveR1 = 7;
+int driveL1 = 6;
+int driveR2 = 4;
+int driveL2 = 5;
+
+//set accel pin
+int y = A5;
 
 void setup(){
   //change driveR and driveL to ouput pins
-  pinMode(driveR, OUTPUT); 
-  pinMode(driveL, OUTPUT);
+  pinMode(driveR1, OUTPUT); 
+  pinMode(driveL1, OUTPUT);
+  pinMode(driveR2, OUTPUT); 
+  pinMode(driveL2, OUTPUT);
+  pinMode(y, INPUT);
   
   gps.begin(9600);
   gps.println(PMTK_SET_NMEA_OUTPUT_GGAONLY);
@@ -118,11 +128,30 @@ double testDrive(long driveTime){
 }
 
 void driveStraight(){
-  digitalWrite(driveR, HIGH);
-  digitalWrite(driveR, HIGH);
+  switch(orientation){
+  case 0:
+    if(y > arbitraryValHi){
+     orientation = 1; 
+    }
+    else if(y < arbitraryValLow){
+     orientation = 2; 
+    }
+  case 1:
+    digitalWrite(driveR1, HIGH);
+    digitalWrite(driveL1, HIGH);
+  case 2:
+    digitalWrite(driveR2, HIGH);
+    digitalWrite(driveL2, HIGH);
+  }
 }
 
 void driveStop(){
-  digitalWrite(driveR, LOW);
-  digitalWrite(driveR, LOW); 
+  switch(orientation){
+  case 1:
+    digitalWrite(driveR1, LOW);
+    digitalWrite(driveL1, LOW);
+  case 2:
+    digitalWrite(driveR2, LOW);
+    digitalWrite(driveL2, LOW); 
+  }
 }
