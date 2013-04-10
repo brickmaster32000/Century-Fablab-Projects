@@ -22,12 +22,13 @@ long checkDelay = 20000; //time between orientation checks after initial test dr
 const double TOLERANCE = .0011; //set to 2m which is estimated GPS error
 
 //set drive signals to pins
+int lEnable = 5;
+int rEnable = 6;
 int driveR1 = 8;
-int driveL1 = 9;
-int driveR2 = 10;
+int driveR2 = 9;
+int driveL1 = 10;
 int driveL2 = 11;
-int rEnable = 5;
-int lEnable = 6;
+
 
 void setup(){
   //change driveR and driveL to ouput pins
@@ -37,7 +38,6 @@ void setup(){
   pinMode(driveL2, OUTPUT);
   pinMode(rEnable, OUTPUT);
   pinMode(lEnable, OUTPUT);
-  pinMode(y, INPUT);
   
   gps.begin(9600);
   gps.println(PMTK_SET_NMEA_OUTPUT_GGAONLY);
@@ -124,13 +124,13 @@ double testDrive(long driveTime){
 }
 
 void driveStraight(){
-  if(y > arbitraryValHi){
+  if(accelInfo > arbitraryValHi){
     digitalWrite(driveR1, HIGH);
     digitalWrite(driveL1, HIGH);
     digitalWrite(driveR2, LOW);
     digitalWrite(driveL2, LOW);
   }
-  else if(y < arbitraryValLow){
+  else if(accelInfo < arbitraryValLow){
     digitalWrite(driveR2, HIGH);
     digitalWrite(driveL2, HIGH);
     digitalWrite(driveR1, LOW);
