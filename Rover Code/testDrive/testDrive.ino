@@ -15,22 +15,19 @@ double destinationLongitude = 4523;
 double currentAngle = 0;
 double destinationAngle = 0;
 
-boolean inAir = true;
+boolean activated = false;
 boolean atDestination = false;
 
 long checkDelay = 20000; //time between orientation checks after initial test drive in milliseconds
 const double TOLERANCE = .0011; //set to 2m which is estimated GPS error
 
-//create switch value for orientation to control which direction the wheels spin
-int orientation = 0;
 //set drive signals to pins
-int driveR1 = 7;
-int driveL1 = 6;
-int driveR2 = 4;
-int driveL2 = 5;
-
-//set accel pin
-int y = A5;
+int driveR1 = 8;
+int driveL1 = 9;
+int driveR2 = 10;
+int driveL2 = 11;
+int rEnable = 5;
+int lEnable = 6;
 
 void setup(){
   //change driveR and driveL to ouput pins
@@ -38,6 +35,8 @@ void setup(){
   pinMode(driveL1, OUTPUT);
   pinMode(driveR2, OUTPUT); 
   pinMode(driveL2, OUTPUT);
+  pinMode(rEnable, OUTPUT);
+  pinMode(lEnable, OUTPUT);
   pinMode(y, INPUT);
   
   gps.begin(9600);
@@ -90,9 +89,6 @@ void loop(){
     }
   
   }
-  
-  
-  
 }
 
 
@@ -128,30 +124,23 @@ double testDrive(long driveTime){
 }
 
 void driveStraight(){
-  switch(orientation){
-  case 0:
-    if(y > arbitraryValHi){
-     orientation = 1; 
-    }
-    else if(y < arbitraryValLow){
-     orientation = 2; 
-    }
-  case 1:
+  if(y > arbitraryValHi){
     digitalWrite(driveR1, HIGH);
     digitalWrite(driveL1, HIGH);
-  case 2:
+    digitalWrite(driveR2, LOW);
+    digitalWrite(driveL2, LOW);
+  }
+  else if(y < arbitraryValLow){
     digitalWrite(driveR2, HIGH);
     digitalWrite(driveL2, HIGH);
+    digitalWrite(driveR1, LOW);
+    digitalWrite(driveL1, LOW); 
   }
+  digitalWrite(rEnable, HIGH);
+  digitalWrite(lEnable, HIGH);
 }
 
 void driveStop(){
-  switch(orientation){
-  case 1:
-    digitalWrite(driveR1, LOW);
-    digitalWrite(driveL1, LOW);
-  case 2:
-    digitalWrite(driveR2, LOW);
-    digitalWrite(driveL2, LOW); 
-  }
+  digitalWrite(rEnable, LOW);
+  digitalWrite(lEnable, LOW);
 }
