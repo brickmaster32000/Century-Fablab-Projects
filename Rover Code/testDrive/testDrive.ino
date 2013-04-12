@@ -1,6 +1,10 @@
-#include <GPS.h>
- 
-GPS gps(&Serial);
+#include <Adafruit_GPS.h>
+#include <Wire.h>
+#include <LSM303.h>
+
+LSM303 compass;
+
+Adafruit_GPS gps(&Serial);
 char c = 0;
 
 double lastLatitude = 0;
@@ -22,8 +26,8 @@ long checkDelay = 20000; //time between orientation checks after initial test dr
 const double TOLERANCE = .0011; //set to 2m which is estimated GPS error
 
 //set drive signals to pins
-int lEnable = 5;
-int rEnable = 6;
+int enableL = 5;
+int enableR = 6;
 int driveR1 = 8;
 int driveR2 = 9;
 int driveL1 = 10;
@@ -36,21 +40,32 @@ void setup(){
   pinMode(driveL1, OUTPUT);
   pinMode(driveR2, OUTPUT); 
   pinMode(driveL2, OUTPUT);
-  pinMode(rEnable, OUTPUT);
-  pinMode(lEnable, OUTPUT);
-  
-  gps.begin(9600);
-  gps.println(PMTK_SET_NMEA_OUTPUT_GGAONLY);
-  gps.println(PMTK_SET_NMEA_UPDATE_5HZ);
+  pinMode(enableR, OUTPUT);
+  pinMode(enableL, OUTPUT);
 
+  //prep xBee
+  serial.begin(9600);
+
+  //prep GPS  
+  gps.begin(9600);
+  gps.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  gps.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);
+
+  //prep Magnetometer
+  Wire.begin();
+  compass.init();
+  compass.enableDefault();
+  //put in good calibration values! these are from FabLab 12APR2013!
+  compass.m_min.x = -697; compass.m_min.y = -622; compass.m_min.z = -538;
+  compass.m_max.x = +472; compass.m_max.y = +502; compass.m_max.z = 889;
 }
 
 void loop(){
-  
+
   while(inAir){
-    
+   
   };
-  
+    
   currentAngle = testDrive(10000);
   destinationAngle = atan2((destinationLatitude - currentLatitude), (destinationLongitude - currentLongitude));
   turnRadians(destinationAngle - currentAngle); // psuedo code to turn rover so many radians.
@@ -64,6 +79,7 @@ void loop(){
   the destination angle and corrects angle if necessary
   ************************************************************************************/  
   while(!atDestination){
+    orientDrive();
     driveStraight(); //code to drive rover straight
     
     time = millis();
@@ -109,6 +125,7 @@ double testDrive(long driveTime){
   lastLongitude = gps.longtiude;
   long time = millis();
   
+  orientDrive();
   driveStraight(); //psuedocode to drive rover straight 
   while(millis() - time < driveTime)
     ; // drive straight until outside of gps error range
@@ -123,7 +140,7 @@ double testDrive(long driveTime){
   return atan2((currentLatitude - lastLatitude), (currentLongitude - lastLongitude));  
 }
 
-void driveStraight(){
+void orientDrive(){
   if(accelInfo > arbitraryValHi){
     digitalWrite(driveR1, HIGH);
     digitalWrite(driveL1, HIGH);
@@ -136,11 +153,30 @@ void driveStraight(){
     digitalWrite(driveR1, LOW);
     digitalWrite(driveL1, LOW); 
   }
-  digitalWrite(rEnable, HIGH);
-  digitalWrite(lEnable, HIGH);
+}
+
+void driveStraight(){ 
+  digitalWrite(enableR, HIGH);
+  digitalWrite(enableL, HIGH);
 }
 
 void driveStop(){
-  digitalWrite(rEnable, LOW);
-  digitalWrite(lEnable, LOW);
+  digitalWrite(enableR, LOW);
+  digitalWrite(enableL, LOW);
 }
+
+//void turnRadians(double rads){
+//  double radsTurned = 0;
+//  
+//  compass.read();
+//  int bearing1 = compass.heading((LSM303::vector){0,-1,0});
+//  
+//  while(radsTurned < rads{
+//  oreintdrive();
+//  digitalWrite(enableR, HIGH);
+//  compass.read();
+//  int bearing2 = compass.heading((LSM303::vector){0,-1,0});
+//  double radsTurned = ((bearing2 - bearing1) * (PI/180))
+//  }
+//  digitalWrite(enableR, LOW)
+//}
