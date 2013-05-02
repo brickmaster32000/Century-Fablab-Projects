@@ -225,13 +225,14 @@ double testDrive(long driveTime){
 }
 
 void orientDrive(){
-  if(1){
+  compass.read();
+  if((int)compass.a.z > 1){
     digitalWrite(driveR1, HIGH);
     digitalWrite(driveL1, HIGH);
     digitalWrite(driveR2, LOW);
     digitalWrite(driveL2, LOW);
   }
-  else if(0){
+  else if((int)compass.a.z < 0){
     digitalWrite(driveR2, HIGH);
     digitalWrite(driveL2, HIGH);
     digitalWrite(driveR1, LOW);
